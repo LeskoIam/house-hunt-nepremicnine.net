@@ -1,3 +1,4 @@
+from scrapy.exceptions import CloseSpider
 from scrapy.spiders import CrawlSpider
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import Rule
@@ -30,6 +31,7 @@ class ExampleSpider(CrawlSpider):
         item["price"] = self.get_price(response)
         item["seller"] = self.get_seller(response)
         item["settlement"] = self.get_settlement(response)
+        item["house_area"] = self.get_area(response)
 
         yield item
 
@@ -60,7 +62,7 @@ class ExampleSpider(CrawlSpider):
             raw = raw.replace("do", "")
         try:
             price = float(raw.replace("€", "").replace(".", "").replace(",", ".").strip())
-        except Exception as exc:
+        except ValueError as err:
             price = -1.
         return price
 
@@ -75,3 +77,11 @@ class ExampleSpider(CrawlSpider):
     def get_settlement(response):
         return response.xpath("//div[@class='kratek']/strong[@class='rdeca']/text()").extract()[0]
 
+    @staticmethod
+    def get_area(response):
+        raw = response.xpath("//div[@class='kratek']/text()").extract()[0]
+        try:
+            area = float(raw.split("m2")[0][1:].replace(",", ".").strip())
+        except ValueError as err:
+            area = -1.
+        return area
