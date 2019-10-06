@@ -32,7 +32,7 @@ class ExampleSpider(CrawlSpider):
         item["price"] = self.get_price(response)
         item["seller"] = self.get_seller(response)
         item["settlement"] = self.get_settlement(response)
-        item["house_area"] = self.get_area(response)
+        item["house_area"], item["land_area"] = self.get_house_and_land_area(response)
 
         yield item
 
@@ -79,10 +79,16 @@ class ExampleSpider(CrawlSpider):
         return response.xpath("//div[@class='kratek']/strong[@class='rdeca']/text()").extract()[0]
 
     @staticmethod
-    def get_area(response):
+    def get_house_and_land_area(response):
         raw = response.xpath("//div[@class='kratek']/text()").extract()[0]
         try:
-            area = float(raw.split("m2")[0][1:].replace(",", ".").strip())
+            house_area = float(raw.split("m2")[0][1:].replace(",", ".").strip())
         except ValueError as err:
-            area = -1.
-        return area
+            house_area = -1.
+
+        try:
+            land_area = int(raw.split("m2")[1].split(",")[-1].replace(".", ""))
+        except ValueError as err:
+            land_area = -1
+
+        return house_area, land_area

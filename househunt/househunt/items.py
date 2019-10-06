@@ -16,6 +16,7 @@ class HousehuntItem(scrapy.Item):
     seller = scrapy.Field()               # Prodajalec ZP - zasebna ponudba
     settlement = scrapy.Field()           # Naselje
     house_area = scrapy.Field()
+    land_area = scrapy.Field()
 
 
 
