@@ -1,7 +1,7 @@
-from scrapy.exceptions import CloseSpider
-from scrapy.spiders import CrawlSpider
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider
 from scrapy.spiders import Rule
+
 from .constants import URL, DOMAIN
 from ..items import HousehuntItem
 
@@ -12,6 +12,7 @@ class ExampleSpider(CrawlSpider):
     start_urls = [URL]
 
     rules = (
+        # Crawl items
         Rule(LinkExtractor(restrict_xpaths="//div[contains(@class, 'oglas_container')]/div/a[contains(@href, 'oglasi-prodaja')]"),
              callback="parse_single_listing"),
         # Crawl "next" pages
