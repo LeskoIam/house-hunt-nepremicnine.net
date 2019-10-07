@@ -26,7 +26,7 @@ class ExampleSpider(CrawlSpider):
 
         item["type_"] = type_
         item["region"] = regija
-        item["administrative_unit"] = upravna_enota
+        item["administrative_unit"] = upravna_enota.replace(",", "")
         item["municipality"] = obcina
         item["url"] = response.url
         item["price"] = self.get_price(response)

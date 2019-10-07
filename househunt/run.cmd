@@ -1,0 +1,1 @@
+scrapy crawl nepremicnine -o test.csv -t csv -L INFO
