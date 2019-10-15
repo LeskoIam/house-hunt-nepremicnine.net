@@ -50,14 +50,9 @@ class ExampleSpider(CrawlSpider):
             raw = response.xpath("/html/body/div[4]/div[3]/div/div[2]/section/div[3]/div[2]/div/p[1]/strong/text()").extract()[0]
         return raw
 
-    def get_region(self, response):
-        raw = response.xpath("//table[@class='oglas-podatki']/tbody/tr[1]/td[2]/b/text()").extract()
-        #                     //table[@class='oglas-podatki']/tbody/tr[1]/td[2]/b/text()
-        #                     //table/tbody/tr[1]/td[1]/table/tbody/tr[1]/td[2]/b
-        print("3"*19)
-        print(dir(response))
-        print(type(response))
-        print("3" * 19)
+    @staticmethod
+    def get_region(response):
+        raw = response.xpath("//table[@class='oglas-podatki']/tr[1]/td[2]/b/text()").extract()[0]
         return raw
 
     # @staticmethod
