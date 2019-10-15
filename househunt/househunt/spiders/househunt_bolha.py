@@ -22,29 +22,43 @@ class ExampleSpider(CrawlSpider):
     def parse_single_listing(self, response):
         item = HousehuntItem()
 
-        price = self.get_price(response)
-
         # _, type_, regija, upravna_enota, obcina = self.get_basic_info(response)
         #
         # item["type_"] = type_
-        # item["region"] = regija
+        item["region"] = self.get_region(response)
         # item["administrative_unit"] = upravna_enota.replace(",", "")
         # item["municipality"] = obcina
         # item["url"] = response.url
-        # item["price"] = self.get_price(response)
-        # item["seller"] = self.get_seller(response)
+        item["price"] = self.get_price(response)
+        item["seller"] = self.get_seller(response)
         # item["settlement"] = self.get_settlement(response)
         # item["house_area"], item["land_area"] = self.get_house_and_land_area(response)
         #
-        # yield item
+        yield item
 
-    def get_price(self, response):
-        raw = response.xpath("//div[@class='price']/span/text()").extract()
-        print("######"*4)
-        print(raw)
-        print("######" * 4)
+    @staticmethod
+    def get_price(response):
+        raw = response.xpath("//div[@class='price']/span/text()").extract()[0]
+        cooked = float(raw.replace("€", "").replace(".", "").replace(",", ".").strip())
+        return cooked
+
+    @staticmethod
+    def get_seller(response):
+        try:
+            raw = response.xpath("/html/body/div[4]/div[3]/div/div[2]/section/div[3]/div[2]/div/p[2]/strong/text()").extract()[0]
+        except IndexError as err:
+            raw = response.xpath("/html/body/div[4]/div[3]/div/div[2]/section/div[3]/div[2]/div/p[1]/strong/text()").extract()[0]
         return raw
 
+    def get_region(self, response):
+        raw = response.xpath("//table[@class='oglas-podatki']/tbody/tr[1]/td[2]/b/text()").extract()
+        #                     //table[@class='oglas-podatki']/tbody/tr[1]/td[2]/b/text()
+        #                     //table/tbody/tr[1]/td[1]/table/tbody/tr[1]/td[2]/b
+        print("3"*19)
+        print(dir(response))
+        print(type(response))
+        print("3" * 19)
+        return raw
 
     # @staticmethod
     # def get_basic_info(response):
@@ -77,12 +91,6 @@ class ExampleSpider(CrawlSpider):
     #         price = -1.
     #     return price
     #
-    # @staticmethod
-    # def get_seller(response):
-    #     raw = response.xpath("//div[@class='prodajalec']/h2/text()").extract()[0]
-    #     if "zasebna" in raw.lower():
-    #         raw = "ZP"
-    #     return raw
     #
     # @staticmethod
     # def get_settlement(response):
