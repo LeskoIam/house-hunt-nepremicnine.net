@@ -45,10 +45,11 @@ class ExampleSpider(CrawlSpider):
     @staticmethod
     def get_seller(response):
         try:
-            raw = response.xpath("/html/body/div[4]/div[3]/div/div[2]/section/div[3]/div[2]/div/p[2]/strong/text()").extract()[0]
+            raw = response.xpath("//div[@id='sellerInfo']/div[@class='box']/p[2]/strong/text()").extract()[0]
         except IndexError as err:
-            raw = response.xpath("/html/body/div[4]/div[3]/div/div[2]/section/div[3]/div[2]/div/p[1]/strong/text()").extract()[0]
-        return raw
+            raw = response.xpath("//div[@id='sellerInfo']/div/p[1]/strong/text()").extract()[0]
+        cooked = raw.strip()
+        return cooked
 
     @staticmethod
     def get_region(response):
