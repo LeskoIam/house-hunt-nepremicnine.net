@@ -32,7 +32,8 @@ class ExampleSpider(CrawlSpider):
         item["price"] = self.get_price(response)
         item["seller"] = self.get_seller(response)
         # item["settlement"] = self.get_settlement(response)
-        # item["house_area"], item["land_area"] = self.get_house_and_land_area(response)
+        item["house_area"] = self.get_house_area(response)
+        # item["land_area"] = self.get_house_and_land_area(response)
         #
         yield item
 
@@ -55,6 +56,12 @@ class ExampleSpider(CrawlSpider):
     def get_region(response):
         raw = response.xpath("//table[@class='oglas-podatki']/tr[1]/td[2]/b/text()").extract()[0]
         return raw
+
+    @staticmethod
+    def get_house_area(response):
+        raw = response.xpath("//table[@class='oglas-podatki']/tr[10]/td[2]/b/text()").extract()[0]
+        cooked = float(raw.replace(",", ".").strip())
+        return cooked
 
     # @staticmethod
     # def get_basic_info(response):
