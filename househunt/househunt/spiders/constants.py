@@ -9,5 +9,5 @@ URL_NEPREMICNINE = "https://www.nepremicnine.net/oglasi-prodaja/ljubljana-okolic
 
 
 DOMAIN_BOLHA = "bolha.com"
-URL_BOLHA = "http://www.bolha.com/nepremicnine/hise?reType=monta%C5%BEna%7C%7Csamostojna&location=Osrednjeslovenska/%7C%7CJugovzhodna%20Slovenija/%7C%7CNotranjsko-kra%C5%A1ka/&viewType=30&adTypeH=00_Prodam/&priceSortField=0%7C150000&reSize=70%7C8223&reSizeExtra=600%7C14289"
-
+# URL_BOLHA = "http://www.bolha.com/nepremicnine/hise?reType=monta%C5%BEna%7C%7Csamostojna&location=Osrednjeslovenska/%7C%7CJugovzhodna%20Slovenija/%7C%7CNotranjsko-kra%C5%A1ka/&viewType=30&adTypeH=00_Prodam/&priceSortField=0%7C150000&reSize=70%7C8223&reSizeExtra=600%7C14289"
+URL_BOLHA = "http://www.bolha.com/nepremicnine/hise?reType=monta%C5%BEna%7C%7Csamostojna%7C%7Costalo&viewType=30&adTypeH=00_Prodam/&priceSortField=0%7C150000&reSize=70%7C8223&reSizeExtra=600%7C170000&location=Jugovzhodna%20Slovenija/%7C%7COsrednjeslovenska/%7C%7CSpodnjeposavska/%7C%7CZasavska/%7C%7CSavinjska/"

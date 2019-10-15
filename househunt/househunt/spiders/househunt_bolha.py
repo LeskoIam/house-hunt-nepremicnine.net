@@ -22,19 +22,13 @@ class ExampleSpider(CrawlSpider):
     def parse_single_listing(self, response):
         item = HousehuntItem()
 
-        # _, type_, regija, upravna_enota, obcina = self.get_basic_info(response)
-        #
-        # item["type_"] = type_
         item["region"] = self.get_region(response)
-        # item["administrative_unit"] = upravna_enota.replace(",", "")
-        # item["municipality"] = obcina
-        # item["url"] = response.url
+        item["administrative_unit"] = "na"
+        item["municipality"] = "na"
+        item["url"] = response.url
         item["price"] = self.get_price(response)
         item["seller"] = self.get_seller(response)
-        # item["settlement"] = self.get_settlement(response)
-        item["house_area"] = self.get_house_area(response)
-        # item["land_area"] = self.get_house_and_land_area(response)
-        #
+        item["house_area"], item["land_area"], item["settlement"], item["type_"] = self.get_listing_basic_data(response)
         yield item
 
     @staticmethod
@@ -48,7 +42,8 @@ class ExampleSpider(CrawlSpider):
         try:
             raw = response.xpath("//div[@id='sellerInfo']/div[@class='box']/p[2]/strong/text()").extract()[0]
         except IndexError as err:
-            raw = response.xpath("//div[@id='sellerInfo']/div/p[1]/strong/text()").extract()[0]
+            # raw = response.xpath("//div[@id='sellerInfo']/div/p[1]/strong/text()").extract()[0]
+            raw = "ZP"
         cooked = raw.strip()
         return cooked
 
@@ -58,58 +53,33 @@ class ExampleSpider(CrawlSpider):
         return raw
 
     @staticmethod
-    def get_house_area(response):
-        raw = response.xpath("//table[@class='oglas-podatki']/tr[10]/td[2]/b/text()").extract()[0]
-        cooked = float(raw.replace(",", ".").strip())
-        return cooked
+    def get_listing_basic_data(response):
+        field_names = response.xpath("//table[@class='oglas-podatki']/tr/td[1]/text()").extract()
 
-    # @staticmethod
-    # def get_basic_info(response):
-    #     """
-    #     Vrsta
-    #     Regija
-    #     Upravna enota
-    #     Obcina
-    #     """
-    #
-    #     raw = response.xpath("//div[@class='more_info'][contains(.,'Posredovanje')]/text()").extract()
-    #
-    #     raw = raw[0].split("|")
-    #     out = []
-    #     for data in raw:
-    #         data = data.split(":")[-1].strip()
-    #         out.append(data)
-    #     return out
-    #
-    # @staticmethod
-    # def get_price(response):
-    #     raw = response.xpath("//div[@class='cena clearfix']/span/text()").extract()[0]
-    #     if "cca" in raw.lower():
-    #         raw = raw.replace("cca", "")
-    #     if "do" in raw.lower():
-    #         raw = raw.replace("do", "")
-    #     try:
-    #         price = float(raw.replace("€", "").replace(".", "").replace(",", ".").strip())
-    #     except ValueError as err:
-    #         price = -1.
-    #     return price
-    #
-    #
-    # @staticmethod
-    # def get_settlement(response):
-    #     return response.xpath("//div[@class='kratek']/strong[@class='rdeca']/text()").extract()[0]
-    #
-    # @staticmethod
-    # def get_house_and_land_area(response):
-    #     raw = response.xpath("//div[@class='kratek']/text()").extract()[0]
-    #     try:
-    #         house_area = float(raw.split("m2")[0][1:].replace(",", ".").strip())
-    #     except ValueError as err:
-    #         house_area = -1.
-    #
-    #     try:
-    #         land_area = int(raw.split("m2")[1].split(",")[-1].replace(".", ""))
-    #     except ValueError as err:
-    #         land_area = -1
-    #
-    #     return house_area, land_area
+        field_names = [x for x in field_names if len(x) > 3]
+
+        print(field_names)
+        field_data_indexes = {}
+        for i, field_name in enumerate(field_names, start=1):
+            field_name = field_name.lower()
+            if "velikost" in field_name:
+                field_data_indexes["velikost"] = i
+            elif "parcela" in field_name:
+                field_data_indexes["parcela"] = i
+            elif "kraj:" in field_name:
+                field_data_indexes["naselje"] = i
+            elif "tip hiše" in field_name:
+                field_data_indexes["type"] = i
+
+        print(field_data_indexes)
+        raw_house_area = response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('velikost', -1)}]/td[2]/b/text()").extract()[0]
+        raw_land_area = response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('parcela', -1)}]/td[2]/b/text()").extract()[0]
+        raw_settlement = response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('naselje', -1)}]/td[2]/b/text()").extract()[0]
+        raw_type = response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('type', -1)}]/td[2]/b/text()").extract()[0]
+
+        cooked_house_area = float(raw_house_area.replace("m2", "").replace(",", ".").strip())
+        cooked_land_area = float(raw_land_area.replace("m2", "").replace(",", ".").strip())
+        cooked_settlement = raw_settlement.strip()
+        cooked_type = raw_type.strip()
+
+        return cooked_house_area, cooked_land_area, cooked_settlement, cooked_type
