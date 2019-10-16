@@ -19,42 +19,44 @@ class ExampleSpider(CrawlSpider):
         Rule(LinkExtractor(restrict_xpaths="(//a[@class='forward'])[1]")),
     )
 
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+
+        self.response = None
+
     def parse_single_listing(self, response):
+        self.response = response
         item = HousehuntItem()
 
-        item["region"] = self.get_region(response)
+        item["region"] = self.get_region()
         item["administrative_unit"] = "na"
         item["municipality"] = "na"
         item["url"] = response.url
-        item["price"] = self.get_price(response)
-        item["seller"] = self.get_seller(response)
-        item["house_area"], item["land_area"], item["settlement"], item["type_"] = self.get_listing_basic_data(response)
+        item["price"] = self.get_price()
+        item["seller"] = self.get_seller()
+        item["house_area"], item["land_area"], item["settlement"], item["type_"] = self.get_listing_basic_data()
         yield item
 
-    @staticmethod
-    def get_price(response):
-        raw = response.xpath("//div[@class='price']/span/text()").extract()[0]
+    def get_price(self):
+        raw = self.response.xpath("//div[@class='price']/span/text()").extract()[0]
         cooked = float(raw.replace("€", "").replace(".", "").replace(",", ".").strip())
         return cooked
 
-    @staticmethod
-    def get_seller(response):
+    def get_seller(self):
         try:
-            raw = response.xpath("//div[@id='sellerInfo']/div[@class='box']/p[2]/strong/text()").extract()[0]
+            raw = self.response.xpath("//div[@id='sellerInfo']/div[@class='box']/p[2]/strong/text()").extract()[0]
         except IndexError as err:
             # raw = response.xpath("//div[@id='sellerInfo']/div/p[1]/strong/text()").extract()[0]
             raw = "ZP"
         cooked = raw.strip()
         return cooked
 
-    @staticmethod
-    def get_region(response):
-        raw = response.xpath("//table[@class='oglas-podatki']/tr[1]/td[2]/b/text()").extract()[0]
+    def get_region(self):
+        raw = self.response.xpath("//table[@class='oglas-podatki']/tr[1]/td[2]/b/text()").extract()[0]
         return raw
 
-    @staticmethod
-    def get_listing_basic_data(response):
-        field_names = response.xpath("//table[@class='oglas-podatki']/tr/td[1]/text()").extract()
+    def get_listing_basic_data(self):
+        field_names = self.response.xpath("//table[@class='oglas-podatki']/tr/td[1]/text()").extract()
 
         field_names = [x for x in field_names if len(x) > 3]
 
@@ -72,10 +74,10 @@ class ExampleSpider(CrawlSpider):
                 field_data_indexes["type"] = i
 
         print(field_data_indexes)
-        raw_house_area = response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('velikost', -1)}]/td[2]/b/text()").extract()[0]
-        raw_land_area = response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('parcela', -1)}]/td[2]/b/text()").extract()[0]
-        raw_settlement = response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('naselje', -1)}]/td[2]/b/text()").extract()[0]
-        raw_type = response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('type', -1)}]/td[2]/b/text()").extract()[0]
+        raw_house_area = self.response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('velikost', -1)}]/td[2]/b/text()").extract()[0]
+        raw_land_area = self.response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('parcela', -1)}]/td[2]/b/text()").extract()[0]
+        raw_settlement = self.response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('naselje', -1)}]/td[2]/b/text()").extract()[0]
+        raw_type = self.response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('type', -1)}]/td[2]/b/text()").extract()[0]
 
         cooked_house_area = float(raw_house_area.replace("m2", "").replace(",", ".").strip())
         cooked_land_area = float(raw_land_area.replace("m2", "").replace(",", ".").strip())
