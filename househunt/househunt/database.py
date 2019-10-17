@@ -38,7 +38,7 @@ class RawHousehuntDB(DeclarativeBase):
 
     id = Column(Integer, primary_key=True)
 
-    url = Column("url", Text())
+    url = Column("url", Text(), nullable=False)
     type_ = Column("type", String())
     region = Column("region", String())
     administrative_unit = Column("administrative_unit", String())
