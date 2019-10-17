@@ -28,13 +28,12 @@ class ExampleSpider(CrawlSpider):
         self.response = response
         item = HousehuntItem()
 
-        item["region"] = self.get_region()
         item["administrative_unit"] = "na"
         item["municipality"] = "na"
         item["url"] = response.url
         item["price"] = self.get_price()
         item["seller"] = self.get_seller()
-        item["house_area"], item["land_area"], item["settlement"], item["type_"] = self.get_listing_basic_data()
+        item["house_area"], item["land_area"], item["settlement"], item["type_"], item["region"] = self.get_listing_basic_data()
         yield item
 
     def get_price(self):
@@ -50,10 +49,6 @@ class ExampleSpider(CrawlSpider):
             raw = "ZP"
         cooked = raw.strip()
         return cooked
-
-    def get_region(self):
-        raw = self.response.xpath("//table[@class='oglas-podatki']/tr[1]/td[2]/b/text()").extract()[0]
-        return raw
 
     def get_listing_basic_data(self):
         field_names = self.response.xpath("//table[@class='oglas-podatki']/tr/td[1]/text()").extract()
@@ -72,16 +67,20 @@ class ExampleSpider(CrawlSpider):
                 field_data_indexes["naselje"] = i
             elif "tip hiše" in field_name:
                 field_data_indexes["type"] = i
+            elif "regija" in field_name:
+                field_data_indexes["region"] = i
 
         print(field_data_indexes)
         raw_house_area = self.response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('velikost', -1)}]/td[2]/b/text()").extract()[0]
         raw_land_area = self.response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('parcela', -1)}]/td[2]/b/text()").extract()[0]
         raw_settlement = self.response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('naselje', -1)}]/td[2]/b/text()").extract()[0]
         raw_type = self.response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('type', -1)}]/td[2]/b/text()").extract()[0]
+        raw_region = self.response.xpath(f"//table[@class='oglas-podatki']/tr[{field_data_indexes.get('region', -1)}]/td[2]/b/text()").extract()[0]
 
         cooked_house_area = float(raw_house_area.replace("m2", "").replace(",", ".").strip())
         cooked_land_area = float(raw_land_area.replace("m2", "").replace(",", ".").strip())
         cooked_settlement = raw_settlement.strip()
         cooked_type = raw_type.strip()
+        cooked_region = raw_region.strip()
 
-        return cooked_house_area, cooked_land_area, cooked_settlement, cooked_type
+        return cooked_house_area, cooked_land_area, cooked_settlement, cooked_type, cooked_region
