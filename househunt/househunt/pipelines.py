@@ -36,6 +36,7 @@ class HousehuntPipeline(object):
         db.settlement = item["settlement"]
         db.house_area = item["house_area"]
         db.land_area = item["land_area"]
+        db.description = item["description"]
 
         try:
             session.add(db)

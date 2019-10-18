@@ -33,6 +33,7 @@ class ExampleSpider(CrawlSpider):
         item["seller"] = self.get_seller(response)
         item["settlement"] = self.get_settlement(response)
         item["house_area"], item["land_area"] = self.get_house_and_land_area(response)
+        item["description"] = self.get_description(response)
 
         yield item
 
@@ -92,3 +93,16 @@ class ExampleSpider(CrawlSpider):
             land_area = -1
 
         return house_area, land_area
+
+    def get_description(self, response):
+        raw = response.xpath("normalize-space(//div[@class='web-opis'])").getall()
+
+        if len(raw) == 0:
+            cooked = ""
+        elif len(raw) == 1:
+            cooked = raw[0]
+        else:
+            cooked = " ".join(raw)
+        cooked = cooked.replace("Dodaten opis", "")
+
+        return cooked

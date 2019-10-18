@@ -17,6 +17,7 @@ class HousehuntItem(scrapy.Item):
     settlement = scrapy.Field()           # Naselje
     house_area = scrapy.Field()
     land_area = scrapy.Field()
+    description = scrapy.Field()
 
 
 

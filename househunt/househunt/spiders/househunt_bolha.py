@@ -34,6 +34,8 @@ class ExampleSpider(CrawlSpider):
         item["price"] = self.get_price()
         item["seller"] = self.get_seller()
         item["house_area"], item["land_area"], item["settlement"], item["type_"], item["region"] = self.get_listing_basic_data()
+        item["description"] = self.get_description()
+
         yield item
 
     def get_price(self):
@@ -84,3 +86,16 @@ class ExampleSpider(CrawlSpider):
         cooked_region = raw_region.strip()
 
         return cooked_house_area, cooked_land_area, cooked_settlement, cooked_type, cooked_region
+
+    def get_description(self):
+        raw = self.response.xpath("normalize-space(//div[@class='content'])").getall()
+
+        if len(raw) == 0:
+            cooked = ""
+        elif len(raw) == 1:
+            cooked = raw[0]
+        else:
+            cooked = " ".join(raw)
+        cooked = " ".join(cooked.split("datni opis:")[1:])
+
+        return cooked

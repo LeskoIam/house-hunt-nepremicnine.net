@@ -48,5 +48,6 @@ class RawHousehuntDB(DeclarativeBase):
     settlement = Column("settlement", String())
     house_area = Column("house_area", Float())
     land_area = Column("land_area", Float())
+    description = Column("description", String())
 
     scraped_on = Column("scraped_on", DateTime(), default=datetime.datetime.utcnow)
