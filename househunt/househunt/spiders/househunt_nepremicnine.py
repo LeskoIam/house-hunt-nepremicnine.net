@@ -19,26 +19,30 @@ class ExampleSpider(CrawlSpider):
         Rule(LinkExtractor(restrict_xpaths="(//div[@id='pagination']/ul/li[@class='paging_next']/a[@class='next'])[1]")),
     )
 
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+        self.response = None
+
     def parse_single_listing(self, response):
+        self.response = response
         item = HousehuntItem()
 
-        _, type_, regija, upravna_enota, obcina = self.get_basic_info(response)
+        _, type_, regija, upravna_enota, obcina = self.get_basic_info()
 
         item["type_"] = type_
         item["region"] = regija
         item["administrative_unit"] = upravna_enota.replace(",", "")
         item["municipality"] = obcina
         item["url"] = response.url
-        item["price"] = self.get_price(response)
-        item["seller"] = self.get_seller(response)
-        item["settlement"] = self.get_settlement(response)
-        item["house_area"], item["land_area"] = self.get_house_and_land_area(response)
-        item["description"] = self.get_description(response)
+        item["price"] = self.get_price()
+        item["seller"] = self.get_seller()
+        item["settlement"] = self.get_settlement()
+        item["house_area"], item["land_area"] = self.get_house_and_land_area()
+        item["description"] = self.get_description()
 
         yield item
 
-    @staticmethod
-    def get_basic_info(response):
+    def get_basic_info(self):
         """
         Vrsta
         Regija
@@ -46,7 +50,7 @@ class ExampleSpider(CrawlSpider):
         Obcina
         """
 
-        raw = response.xpath("//div[@class='more_info'][contains(.,'Posredovanje')]/text()").extract()
+        raw = self.response.xpath("//div[@class='more_info'][contains(.,'Posredovanje')]/text()").extract()
 
         raw = raw[0].split("|")
         out = []
@@ -55,9 +59,8 @@ class ExampleSpider(CrawlSpider):
             out.append(data)
         return out
 
-    @staticmethod
-    def get_price(response):
-        raw = response.xpath("//div[@class='cena clearfix']/span/text()").extract()[0]
+    def get_price(self):
+        raw = self.response.xpath("//div[@class='cena clearfix']/span/text()").extract()[0]
         if "cca" in raw.lower():
             raw = raw.replace("cca", "")
         if "do" in raw.lower():
@@ -68,20 +71,17 @@ class ExampleSpider(CrawlSpider):
             price = -1.
         return price
 
-    @staticmethod
-    def get_seller(response):
-        raw = response.xpath("//div[@class='prodajalec']/h2/text()").extract()[0]
+    def get_seller(self):
+        raw = self.response.xpath("//div[@class='prodajalec']/h2/text()").extract()[0]
         if "zasebna" in raw.lower():
             raw = "ZP"
         return raw
 
-    @staticmethod
-    def get_settlement(response):
-        return response.xpath("//div[@class='kratek']/strong[@class='rdeca']/text()").extract()[0]
+    def get_settlement(self):
+        return self.response.xpath("//div[@class='kratek']/strong[@class='rdeca']/text()").extract()[0]
 
-    @staticmethod
-    def get_house_and_land_area(response):
-        raw = response.xpath("//div[@class='kratek']/text()").extract()[0]
+    def get_house_and_land_area(self):
+        raw = self.response.xpath("//div[@class='kratek']/text()").extract()[0]
         try:
             house_area = float(raw.split("m2")[0][1:].replace(",", ".").strip())
         except ValueError as err:
@@ -94,8 +94,8 @@ class ExampleSpider(CrawlSpider):
 
         return house_area, land_area
 
-    def get_description(self, response):
-        raw = response.xpath("normalize-space(//div[@class='web-opis'])").getall()
+    def get_description(self):
+        raw = self.response.xpath("normalize-space(//div[@class='web-opis'])").getall()
 
         if len(raw) == 0:
             cooked = ""
