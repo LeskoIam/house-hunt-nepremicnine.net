@@ -2,14 +2,14 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider
 from scrapy.spiders import Rule
 
-from .constants import URL_NEPREMICNINE, DOMAIN_NEPREMICNINE
+from .constants import URLS_NEPREMICNINE, DOMAIN_NEPREMICNINE
 from ..items import HousehuntItem
 
 
 class ExampleSpider(CrawlSpider):
     name = 'nepremicnine'
     allowed_domains = [DOMAIN_NEPREMICNINE]
-    start_urls = [URL_NEPREMICNINE]
+    start_urls = URLS_NEPREMICNINE
 
     rules = (
         # Crawl items
