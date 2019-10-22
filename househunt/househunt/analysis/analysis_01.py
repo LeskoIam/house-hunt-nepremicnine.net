@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 import webbrowser
+import googlemaps
 
 CONNECTION_STRING = "{drivername}://{user}:{passwd}@{host}:{port}/{db_name}".format(
     drivername="postgres",
@@ -41,10 +42,10 @@ if __name__ == "__main__":
          AND lower(t.settlement) not similar to '%%ig%%|%%litija%%'
          AND lower(t.administrative_unit) not like '%%litija%%'
          AND t.price between 90000 and 150000
-         AND (t.land_area/t.house_area) >= 6
+         AND (t.land_area/t.house_area) > 6.5
          AND t.land_area > 600
-         AND t.house_area > 80;
-         --AND lower(t.description) like '%%gozd%%'
+         AND t.house_area > 80
+         AND lower(t.description) like '%%opt%%';
          -- AND t.url LIKE '%%bolha%%'
     --ORDER BY l_vs_h DESC;
     """
@@ -53,7 +54,13 @@ if __name__ == "__main__":
 
     for i, row in enumerate(rs):
         print(row)
-        if i < 7:
-            webbrowser.open(f"{row[0]}")
+        if i < 70:
+            webbrowser.open(row[0])
         else:
             print("Not opening...")
+
+    # gmaps = googlemaps.Client(key='AIzaSyDzXBn2yGUUKSpf9pM1nXf3fIq2lj-EfEQ')
+    # geocode_result = help(gmaps.distance_matrix)
+    # print(geocode_result)
+    # print(gmaps.distance_matrix("Ljubljana", "Ptuj"))
+
